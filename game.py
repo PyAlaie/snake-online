@@ -1,5 +1,6 @@
 from snake import Snake
 from coordinates import Coordinates
+import time
 
 class Snake_map():
     def __init__(self, size) -> None:
@@ -19,7 +20,7 @@ class Snake_map():
             self.map[0][i] = 1
             self.map[self.size[0]-1][i] = 1
     
-    def print_blank_map(self):
+    def print_raw_map(self):
         for i in range(self.size[0]):
             for j in range(self.size[1]):
                 if self.map[i][j] == 0: #blank
@@ -28,8 +29,28 @@ class Snake_map():
                     print('X', end='')
             print()
             
-    def print_full_map(self, snakes):
-        pass
+    def print_map(self, snake_map):
+        for i in snake_map:
+            for j in i:
+                print(j, end='')
+            print()
+    
+    def generate_full_map(self, snakes):
+        res = []
+        for row in self.map:
+            temp = []
+            for col in row:
+                if col == 0:
+                    temp.append(" ")
+                elif col == 1:
+                    temp.append("X")
+            res.append(temp)
+        
+        for snake in snakes:
+            for coord in snake.coordinates:
+                res[coord.x][coord.y] = "S"
+                
+        return res
             
 
 class Game():
@@ -38,6 +59,10 @@ class Game():
         self.refresh_rate = refresh_rate
         self.map = Snake_map(map_size)
         
-        self.map.print_blank_map()
     
+    def run_game(self):
+        while(1):
+            snakes = [snake.coordinates for snake in self.clients]
+            self.map.print_map(self.map.generate_full_map(snakes))
+            time.sleep(self.refresh_rate)
     
