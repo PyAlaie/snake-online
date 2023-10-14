@@ -17,7 +17,6 @@ class Snake():
         elif self.direction == 'a':
             head.y -= 1
         
-        print(head)
         self.coordinates.insert(0, head)
         self.coordinates.pop(-1)
         
@@ -25,11 +24,11 @@ class Snake():
         return len(self.coordinates)
     
     def change_direction(self, new_direction):
-        if new_direction == 'w':
+        if new_direction == 'w' and self.direction != "s":
             self.direction = 'w'
-        elif new_direction == 'd':
+        elif new_direction == 'd' and self.direction != "a":
             self.direction = 'd'
-        elif new_direction == 's':
+        elif new_direction == 's' and self.direction != "w":
             self.direction = 's'
-        elif new_direction == 'a':
+        elif new_direction == 'a' and self.direction != "d":
             self.direction = 'a'
