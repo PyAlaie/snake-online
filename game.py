@@ -1,12 +1,13 @@
 from snake import Snake
 from coordinates import Coordinates
-import time
+import time, random
 
 class Snake_map():
     def __init__(self, size) -> None:
         self.size = size
         self.map = []
         self.create_map()
+        self.apple = None
         
     def create_map(self):
         for i in range(self.size[0]):
@@ -29,11 +30,12 @@ class Snake_map():
                     print('X', end='')
             print()
             
-    def print_map(self, snake_map):
+    def print_map(self, snake_map, *args, **kwargs):
         for i in snake_map:
             for j in i:
                 print(j, end='')
             print()
+        print(args, kwargs)        
     
     def generate_full_map(self, snakes):
         res = []
@@ -47,22 +49,76 @@ class Snake_map():
             res.append(temp)
         
         for snake in snakes:
+            print(snake.coordinates[0])
             for coord in snake.coordinates:
                 res[coord.x][coord.y] = "S"
+        
+        if self.apple != None:
+            res[self.apple.x][self.apple.y] = 'A'
                 
         return res
             
 
 class Game():
-    def __init__(self, clients, refresh_rate=0.5, map_size=(30,30)):
+    def __init__(self, clients, refresh_rate=0.2, map_size=(25,30)):
         self.clients = clients
         self.refresh_rate = refresh_rate
         self.map = Snake_map(map_size)
         
+    def check_any_collision(self):
+        snakes = [client.snake for client in self.clients]
+        
+        # checking if there is a collision with wall
+        for snake in snakes:
+            head = snake.head()
+            if self.map.map[head.x][head.y] == 1:
+                print('snake died')
+                snake.die()
+                
+        # checking if there is a collision with other snakes
+    
+    def generate_apple(self):
+        # generate apple if there is none
+        all_coords = [client.snake.coordinates for client in self.clients]
+        all_coords = [coord for coord in all_coords]
+        
+        while 1:
+            rand_x = random.randint(2, self.map.size[0]-2)
+            rand_y = random.randint(2, self.map.size[1]-2)
+            
+            if Coordinates(rand_x, rand_y) not in all_coords:
+                self.map.apple = Coordinates(rand_x, rand_y)
+                break
+        
+    
+    def eat_apple(self):
+        snakes = [client.snake for client in self.clients]
+        
+        for snake in snakes:
+            head = snake.head()
+            if head.x == self.map.apple.x and head.y == self.map.apple.y:
+                self.map.apple = None
+                snake.point += 1
+                snake.grow_size += 1
     
     def run_game(self):
         while(1):
-            snakes = [snake.coordinates for snake in self.clients]
-            self.map.print_map(self.map.generate_full_map(snakes))
+            snakes = [client.snake for client in self.clients]
+            generated_map = self.map.generate_full_map(snakes)
+            self.map.print_map(generated_map, self.clients[0].snake.direction)
+            
+            # broadcasting the map
+            for client in self.clients:
+                client.send_map_to_client(generated_map)
+                
+            # making the snakes move, and other events to happen
+            for snake in snakes:
+                snake.move_snake()
+            self.check_any_collision()
+            if not self.map.apple:
+                self.generate_apple()
+            self.eat_apple()
+                
+            # sleeping
             time.sleep(self.refresh_rate)
     

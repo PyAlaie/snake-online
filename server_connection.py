@@ -1,5 +1,5 @@
 import socket
-import threading
+import threading, pickle, struct
 
 class Input_stream():
     def __init__(self, snake, input_stream) -> None:
@@ -33,6 +33,7 @@ class Client():
     def runClient(self):
         try:
             # Initializing input stream
+            self.input_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.input_socket.bind(("127.0.0.1", 3142))
             self.input_socket.listen(4)
             self.input_stream, address = self.input_socket.accept()
@@ -44,6 +45,11 @@ class Client():
         except KeyboardInterrupt:
             self.input_socket.close()
         
-    def get_snake(self):
-        return self.snake
-    
+    def send_map_to_client(self, snake_map):
+        data = pickle.dumps(snake_map)
+        
+        size = len(data)
+        size_in_4_bytes = struct.pack('I', size)
+        self.output_stream.send(size_in_4_bytes)
+        
+        self.output_stream.send(data)

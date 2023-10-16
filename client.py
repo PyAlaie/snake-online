@@ -1,8 +1,15 @@
-import socket, threading, time
+import socket, threading, time, pickle, struct
 from getkey import getkey, keys
 
 HOST = "127.0.0.1"  
 PORT = 3141
+
+def print_map(snake_map, *args, **kwargs):
+        for i in snake_map:
+            for j in i:
+                print(j, end='')
+            print()
+        print(args, kwargs)  
 
 class Input_stream():
     def __init__(self, input_stream):
@@ -10,7 +17,17 @@ class Input_stream():
     
     def run_stream(self):
         print("Input stream stablish!")
-        # print the map
+        while(1):
+            size_in_4_bytes = self.input_stream.recv(4)
+            size = struct.unpack('I', size_in_4_bytes)[0]
+
+            data = self.input_stream.recv(size)
+            if not data:
+                continue
+            
+            snake_map = pickle.loads(data)
+            print_map(snake_map)
+            
     
 class Output_stream():
     def __init__(self, output_stream):
