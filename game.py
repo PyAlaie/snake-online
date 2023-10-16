@@ -57,7 +57,6 @@ class Snake_map():
             res[self.apple.x][self.apple.y] = 'A'
                 
         return res
-            
 
 class Game():
     def __init__(self, clients, refresh_rate=0.2, map_size=(25,30)):
@@ -76,6 +75,22 @@ class Game():
                 snake.die()
                 
         # checking if there is a collision with other snakes
+        all_coords = []
+        for snake in snakes:
+            for coord in snake.coordinates:
+                all_coords.append(coord)
+                
+        def good_count(head):
+            res = 0
+            for c in all_coords:
+                if c.x == head.x and c.y == head.y:
+                    res += 1
+            return res
+        for snake in snakes:
+            head = snake.head()
+            if good_count(head) >= 2:
+                print('snake died')
+                snake.die()
     
     def generate_apple(self):
         # generate apple if there is none
