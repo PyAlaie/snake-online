@@ -107,14 +107,17 @@ class Game():
         
     
     def eat_apple(self):
-        snakes = [client.snake for client in self.clients]
-        
-        for snake in snakes:
-            head = snake.head()
-            if head.x == self.map.apple.x and head.y == self.map.apple.y:
-                self.map.apple = None
-                snake.point += 1
-                snake.grow_size += 1
+        if self.map.apple != None:
+            snakes = [client.snake for client in self.clients]
+            for snake in snakes:
+                head = snake.head()
+                print(self.map.apple)
+                print(head)
+                if head.x == self.map.apple.x and head.y == self.map.apple.y:
+                    self.map.apple = None
+                    snake.point += 1
+                    snake.grow_size += 1
+                    break
     
     def run_game(self):
         while(1):
@@ -130,9 +133,9 @@ class Game():
             for snake in snakes:
                 snake.move_snake()
             self.check_any_collision()
-            if not self.map.apple:
-                self.generate_apple()
             self.eat_apple()
+            if self.map.apple == None:
+                self.generate_apple()
                 
             # sleeping
             time.sleep(self.refresh_rate)

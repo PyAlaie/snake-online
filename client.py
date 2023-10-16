@@ -37,6 +37,8 @@ class Output_stream():
         print("Output stream stablish!")
         while 1:
             key = getkey()
+            if key == keys.CTRL_C:
+                break
             self.output_stream.send(key.encode())
         
     def read_key(self):
@@ -44,18 +46,22 @@ class Output_stream():
         return key
 
 # Connecting to the sockets
-input_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-input_socket.connect((HOST, PORT))
-input_stream = Input_stream(input_socket)
+try:
+    input_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    input_socket.connect((HOST, PORT))
+    input_stream = Input_stream(input_socket)
 
-time.sleep(1)
-output_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-output_socket.connect((HOST, 3142))
-output_socket.setblocking(True)
-output_stream = Output_stream(output_socket)
+    time.sleep(1)
+    output_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    output_socket.connect((HOST, 3142))
+    output_socket.setblocking(True)
+    output_stream = Output_stream(output_socket)
 
-# Starting the threads
-input_thread = threading.Thread(target=input_stream.run_stream)
-output_thread = threading.Thread(target=output_stream.run_stream)
-input_thread.start()
-output_thread.start()
+    # Starting the threads
+    input_thread = threading.Thread(target=input_stream.run_stream)
+    output_thread = threading.Thread(target=output_stream.run_stream)
+    input_thread.start()
+    output_thread.start()
+except KeyboardInterrupt:
+    input_socket.close()
+    output_socket.close()

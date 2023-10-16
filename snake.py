@@ -58,3 +58,4 @@ class Snake():
     
     def respawn(self):
         self.coordinates = snakes_number[self.number].copy()
+        self.direction = 'd'
