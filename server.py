@@ -25,7 +25,7 @@ try:
         clients.append(client)
         
         # if all 4 players have joined stop accepting new connections
-        if len(clients) == 4:
+        if len(clients) == 2:
             print("All players joined!")
             break
 
